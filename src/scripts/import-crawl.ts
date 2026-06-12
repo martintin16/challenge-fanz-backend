@@ -106,8 +106,6 @@ interface FirecrawlJSON {
   };
 }
 
-// ── Main ─────────────────────────────────────────────────
-
 async function main(): Promise<void> {
   const carpeta = join(process.cwd(), "crawl-data");
 

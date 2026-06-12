@@ -1,25 +1,38 @@
-import 'dotenv/config'
-import express from 'express'
-import cors from 'cors'
-import chatRouter from './routes/chat.js'
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
+import chatRouter from "./routes/chat.js";
 
-const app = express()
-const PORT = process.env.PORT ?? 3001
+const app = express();
+const PORT = process.env.PORT ?? 3001;
 
-app.use(cors({
-  origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
-  methods: ['GET', 'POST'],
-}))
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL ?? "http://localhost:3000",
+    methods: ["GET", "POST"],
+  }),
+);
 
-app.use(express.json())
+app.use(express.json());
+app.set("trust proxy", 1);
 
-app.use('/api/chat', chatRouter)
+const chatLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 30, // 30 requests por IP en esa ventana
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Demasiadas consultas. Esperá unos minutos e intentá de nuevo.",
+  },
+});
 
-// Health check — útil para Railway y para verificar que el server está vivo
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
-})
+app.use("/api/chat", chatLimiter, chatRouter);
+
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 app.listen(PORT, () => {
-  console.log(`🚀 Fanzly backend corriendo en http://localhost:${PORT}`)
-})
+  console.log(`🚀 Fanzly backend corriendo en http://localhost:${PORT}`);
+});
