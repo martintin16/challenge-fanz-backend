@@ -112,10 +112,15 @@ async function main(): Promise<void> {
         scrapeOptions: { formats: ["markdown"] },
       });
 
+      if ('error' in resultado) {
+        console.error(`  Error crawleando ${sitio.url}:`, resultado.error);
+        continue;
+      }
+
       for (const pagina of resultado.data ?? []) {
         if (!pagina.markdown || pagina.markdown.length < 200) continue;
-        const url =
-          (pagina.metadata as { sourceURL?: string })?.sourceURL ?? sitio.url;
+        // v4: la URL está en metadata.url (ya no en metadata.sourceURL)
+        const url = pagina.metadata?.url ?? sitio.url;
         console.log(`  Procesando: ${url}`);
         await procesarPagina(url, pagina.markdown);
       }
@@ -124,8 +129,15 @@ async function main(): Promise<void> {
       const resultado = await firecrawl.scrapeUrl(sitio.url, {
         formats: ["markdown"],
       });
-      if (resultado.data?.markdown) {
-        await procesarPagina(sitio.url, resultado.data.markdown);
+
+      if ('error' in resultado) {
+        console.error(`  Error scrapeando ${sitio.url}:`, resultado.error);
+        continue;
+      }
+
+      // v4: markdown está directamente en el resultado, no en .data
+      if (resultado.markdown) {
+        await procesarPagina(sitio.url, resultado.markdown);
       }
     }
   }
