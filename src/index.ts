@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import chatRouter from "./routes/chat.js";
+import cuentaRouter from "./routes/cuenta.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -28,6 +29,8 @@ const chatLimiter = rateLimit({
 });
 
 app.use("/api/chat", chatLimiter, chatRouter);
+
+app.use("/api/cuenta", cuentaRouter);
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });

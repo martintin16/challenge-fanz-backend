@@ -51,7 +51,7 @@ router.post(
         send({ type: "step", text: "🤔 Pensando..." });
 
         const response = await anthropic.messages.create({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-sonnet-4-5",
           max_tokens: 1024,
           system: SYSTEM_PROMPT,
           tools: toolDefinitions,
@@ -65,7 +65,7 @@ router.post(
             )
             .map((b) => b.text)
             .join("");
-
+          send({ type: "step", text: "✅ Listo, armando respuesta..." });
           send({ type: "response", text: texto, source: sourceUrl });
           break;
         }
@@ -101,8 +101,6 @@ router.post(
           ) {
             sourceUrl = resultado.resultados[0].url;
           }
-
-          send({ type: "step", text: "✅ Listo, armando respuesta..." });
 
           // historial
           conversacion = [
